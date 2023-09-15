@@ -1,0 +1,19 @@
+{
+  "config": {
+    "vendoredhb": "_vendor/github.com/naturalcrit/homebrewery"
+  },
+  "name": "hugo-homebrewery",
+  "version": "0.0.1",
+  "description": "Homebrewery as a Hugo Module",
+  "private": true,
+  "main": "",
+  "scripts": {
+    "build:vendor_install": "hugo mod vendor && npm install --ignore-scripts --prefix $npm_package_config_vendoredhb",
+    "build:js": "NODE_PATH=\"$npm_package_config_vendoredhb/node_modules\" node scripts/buildjs.js",
+    "build:css": "NODE_PATH=\"$npm_package_config_vendoredhb/node_modules\" node scripts/buildcss.js",
+    "build": "npm run build:vendor_install && npm run build:js && npm run build:css"
+  },
+  "keywords": [],
+  "author": "tnarik <tnarik@lecafeautomatique.co.uk>",
+  "license": "ISC"
+} 

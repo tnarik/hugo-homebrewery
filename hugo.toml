@@ -1,0 +1,27 @@
+[module]
+    [[module.imports]]
+        path = "github.com/naturalcrit/homebrewery"
+        
+        [[module.imports.mounts]]
+            excludeFiles = "**.less"
+            source = "themes/fonts/5e"
+            target = "static/fonts/5e"
+
+        [[module.imports.mounts]]
+            excludeFiles = "**.less"
+            source = "themes/fonts/Journal"
+            target = "static/fonts/Journal"
+
+        [[module.imports.mounts]]
+            excludeFiles = "**.less"
+            source = "themes/assets"
+            target = "static/assets"
+
+        # Imports below allow vendoreding of files (for JS and CSS building)
+        [[module.imports.mounts]]
+            source = "themes"
+            target = "assets/_/src"
+            
+        [[module.imports.mounts]]
+            source = "shared"
+            target = "assets/_/src"
