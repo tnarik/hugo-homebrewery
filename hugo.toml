@@ -17,7 +17,7 @@
             source = "themes/assets"
             target = "static/assets"
 
-        # Imports below allow vendoreding of files (for JS and CSS building)
+        # Imports below allow vendoring of files (for JS and CSS building)
         [[module.imports.mounts]]
             source = "themes"
             target = "assets/_/src"

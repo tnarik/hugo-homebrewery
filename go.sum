@@ -1,2 +1,6 @@
 github.com/naturalcrit/homebrewery v3.9.1+incompatible h1:K7vrCDMIRCq/sL0T/3iHbaSsavCsGHGz2BvhB05LWS4=
 github.com/naturalcrit/homebrewery v3.9.1+incompatible/go.mod h1:/i4yqADFUW7e+mLkyZATW3gBsSOdxcNmOrTA1lI1/IQ=
+github.com/naturalcrit/homebrewery v3.16.0+incompatible h1:38FZpXLAIKdkfIhSgLkRajxvzBLGKbPWmrcTmdrqfI8=
+github.com/naturalcrit/homebrewery v3.16.0+incompatible/go.mod h1:/i4yqADFUW7e+mLkyZATW3gBsSOdxcNmOrTA1lI1/IQ=
+github.com/naturalcrit/homebrewery v3.16.1-0.20250418115027-3f77e3255004+incompatible h1:KXk5D5LJVJce4KtLHz6HwxoVAkEjcd2SBN/fTXF/lKI=
+github.com/naturalcrit/homebrewery v3.16.1-0.20250418115027-3f77e3255004+incompatible/go.mod h1:/i4yqADFUW7e+mLkyZATW3gBsSOdxcNmOrTA1lI1/IQ=
