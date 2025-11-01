@@ -760,10 +760,10 @@ var require_lodash = __commonJS({
         }();
         var ctxClearTimeout = context.clearTimeout !== root.clearTimeout && context.clearTimeout, ctxNow = Date && Date.now !== root.Date.now && Date.now, ctxSetTimeout = context.setTimeout !== root.setTimeout && context.setTimeout;
         var nativeCeil = Math2.ceil, nativeFloor = Math2.floor, nativeGetSymbols = Object2.getOwnPropertySymbols, nativeIsBuffer = Buffer2 ? Buffer2.isBuffer : undefined2, nativeIsFinite = context.isFinite, nativeJoin = arrayProto.join, nativeKeys = overArg(Object2.keys, Object2), nativeMax = Math2.max, nativeMin = Math2.min, nativeNow = Date.now, nativeParseInt = context.parseInt, nativeRandom = Math2.random, nativeReverse = arrayProto.reverse;
-        var DataView = getNative(context, "DataView"), Map = getNative(context, "Map"), Promise2 = getNative(context, "Promise"), Set2 = getNative(context, "Set"), WeakMap = getNative(context, "WeakMap"), nativeCreate = getNative(Object2, "create");
+        var DataView = getNative(context, "DataView"), Map2 = getNative(context, "Map"), Promise2 = getNative(context, "Promise"), Set2 = getNative(context, "Set"), WeakMap = getNative(context, "WeakMap"), nativeCreate = getNative(Object2, "create");
         var metaMap = WeakMap && new WeakMap();
         var realNames = {};
-        var dataViewCtorString = toSource(DataView), mapCtorString = toSource(Map), promiseCtorString = toSource(Promise2), setCtorString = toSource(Set2), weakMapCtorString = toSource(WeakMap);
+        var dataViewCtorString = toSource(DataView), mapCtorString = toSource(Map2), promiseCtorString = toSource(Promise2), setCtorString = toSource(Set2), weakMapCtorString = toSource(WeakMap);
         var symbolProto = Symbol2 ? Symbol2.prototype : undefined2, symbolValueOf = symbolProto ? symbolProto.valueOf : undefined2, symbolToString = symbolProto ? symbolProto.toString : undefined2;
         function lodash(value) {
           if (isObjectLike(value) && !isArray(value) && !(value instanceof LazyWrapper)) {
@@ -1008,7 +1008,7 @@ var require_lodash = __commonJS({
           this.size = 0;
           this.__data__ = {
             "hash": new Hash(),
-            "map": new (Map || ListCache)(),
+            "map": new (Map2 || ListCache)(),
             "string": new Hash()
           };
         }
@@ -1073,7 +1073,7 @@ var require_lodash = __commonJS({
           var data = this.__data__;
           if (data instanceof ListCache) {
             var pairs = data.__data__;
-            if (!Map || pairs.length < LARGE_ARRAY_SIZE - 1) {
+            if (!Map2 || pairs.length < LARGE_ARRAY_SIZE - 1) {
               pairs.push([key, value]);
               this.size = ++data.size;
               return this;
@@ -2817,7 +2817,7 @@ var require_lodash = __commonJS({
           return result2;
         };
         var getTag = baseGetTag;
-        if (DataView && getTag(new DataView(new ArrayBuffer(1))) != dataViewTag || Map && getTag(new Map()) != mapTag || Promise2 && getTag(Promise2.resolve()) != promiseTag || Set2 && getTag(new Set2()) != setTag || WeakMap && getTag(new WeakMap()) != weakMapTag) {
+        if (DataView && getTag(new DataView(new ArrayBuffer(1))) != dataViewTag || Map2 && getTag(new Map2()) != mapTag || Promise2 && getTag(Promise2.resolve()) != promiseTag || Set2 && getTag(new Set2()) != setTag || WeakMap && getTag(new WeakMap()) != weakMapTag) {
           getTag = function(value) {
             var result2 = baseGetTag(value), Ctor = result2 == objectTag ? value.constructor : undefined2, ctorString = Ctor ? toSource(Ctor) : "";
             if (ctorString) {
@@ -4595,7 +4595,7 @@ var require_lodash = __commonJS({
           position -= target.length;
           return position >= 0 && string.slice(position, end) == target;
         }
-        function escape3(string) {
+        function escape4(string) {
           string = toString(string);
           return string && reHasUnescapedHtml.test(string) ? string.replace(reUnescapedHtml, escapeHtmlChar) : string;
         }
@@ -5201,7 +5201,7 @@ var require_lodash = __commonJS({
         lodash.divide = divide;
         lodash.endsWith = endsWith;
         lodash.eq = eq;
-        lodash.escape = escape3;
+        lodash.escape = escape4;
         lodash.escapeRegExp = escapeRegExp;
         lodash.every = every;
         lodash.find = find;
@@ -5525,86 +5525,162 @@ var require_lodash = __commonJS({
 // _vendor/github.com/naturalcrit/homebrewery/node_modules/romans/romans.js
 var require_romans = __commonJS({
   "_vendor/github.com/naturalcrit/homebrewery/node_modules/romans/romans.js"(exports, module) {
-    var roman_map = {
-      M: 1e3,
-      CM: 900,
-      D: 500,
-      CD: 400,
-      C: 100,
-      XC: 90,
-      L: 50,
-      XL: 40,
-      X: 10,
-      IX: 9,
+    var ROMAN_LOOKUP = new Array(4e3);
+    var DECIMAL_LOOKUP = /* @__PURE__ */ new Map();
+    var CHAR_VALUES = Object.freeze({
+      I: 1,
       V: 5,
-      IV: 4,
-      I: 1
-    };
-    var allChars = Object.keys(roman_map);
-    var allNumerals = Object.values(roman_map);
-    var romanPattern = /^(M{1,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})|M{0,4}(CM|C?D|D?C{1,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})|M{0,4}(CM|CD|D?C{0,3})(XC|X?L|L?X{1,3})(IX|IV|V?I{0,3})|M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|I?V|V?I{1,3}))$/;
+      X: 10,
+      L: 50,
+      C: 100,
+      D: 500,
+      M: 1e3
+    });
+    var CONVERSION_PAIRS = Object.freeze([
+      [1e3, "M"],
+      [900, "CM"],
+      [500, "D"],
+      [400, "CD"],
+      [100, "C"],
+      [90, "XC"],
+      [50, "L"],
+      [40, "XL"],
+      [10, "X"],
+      [9, "IX"],
+      [5, "V"],
+      [4, "IV"],
+      [1, "I"]
+    ]);
+    var INVALID_PATTERNS = Object.freeze([
+      /I{4,}/,
+      /V{2,}/,
+      /X{4,}/,
+      /L{2,}/,
+      /C{4,}/,
+      /D{2,}/,
+      /M{4,}/,
+      /IL|IC|ID|IM/,
+      /VL|VC|VD|VM|VX/,
+      /XD|XM/,
+      /LC|LD|LM/,
+      /DM/,
+      /IVIV|IXIX|XLXL|XCXC|CDCD|CMCM/
+    ]);
+    var VALID_CHARS = /* @__PURE__ */ new Set(["I", "V", "X", "L", "C", "D", "M"]);
+    var initialized = false;
+    function initializeLookupTables() {
+      if (initialized) return;
+      for (let i = 1; i < 4e3; i++) {
+        ROMAN_LOOKUP[i] = buildRomanFast(i);
+        DECIMAL_LOOKUP.set(ROMAN_LOOKUP[i], i);
+      }
+      initialized = true;
+    }
+    function buildRomanFast(num) {
+      let result = "";
+      if (num >= 1e3) {
+        const count = Math.floor(num / 1e3);
+        result += "M".repeat(count);
+        num %= 1e3;
+      }
+      if (num >= 900) {
+        result += "CM";
+        num -= 900;
+      }
+      if (num >= 500) {
+        result += "D";
+        num -= 500;
+      }
+      if (num >= 400) {
+        result += "CD";
+        num -= 400;
+      }
+      if (num >= 100) {
+        const count = Math.floor(num / 100);
+        result += "C".repeat(count);
+        num %= 100;
+      }
+      if (num >= 90) {
+        result += "XC";
+        num -= 90;
+      }
+      if (num >= 50) {
+        result += "L";
+        num -= 50;
+      }
+      if (num >= 40) {
+        result += "XL";
+        num -= 40;
+      }
+      if (num >= 10) {
+        const count = Math.floor(num / 10);
+        result += "X".repeat(count);
+        num %= 10;
+      }
+      if (num >= 9) {
+        result += "IX";
+        num -= 9;
+      }
+      if (num >= 5) {
+        result += "V";
+        num -= 5;
+      }
+      if (num >= 4) {
+        result += "IV";
+        num -= 4;
+      }
+      if (num >= 1) {
+        result += "I".repeat(num);
+      }
+      return result;
+    }
+    function isValidRoman(str) {
+      if (typeof str !== "string" || str.length === 0) return false;
+      for (let i = 0; i < str.length; i++) {
+        if (!VALID_CHARS.has(str[i])) return false;
+      }
+      for (let i = 0; i < INVALID_PATTERNS.length; i++) {
+        if (INVALID_PATTERNS[i].test(str)) return false;
+      }
+      return true;
+    }
     var romanize2 = (decimal) => {
-      if (decimal <= 0 || typeof decimal !== "number" || Math.floor(decimal) !== decimal) {
+      if (decimal === Infinity) {
+        throw new Error("requires max value of less than 4000");
+      }
+      if ((decimal | 0) !== decimal || decimal <= 0) {
         throw new Error("requires an unsigned integer");
       }
       if (decimal >= 4e3) {
         throw new Error("requires max value of less than 4000");
       }
-      decimal = decimal.toString().replace(/^0+/, "");
-      const result = [];
-      for (let i = 0; i < allChars.length; i++) {
-        const count = Math.floor(decimal / allNumerals[i]);
-        if (count > 0) {
-          result.push(allChars[i].repeat(count));
-          decimal %= allNumerals[i];
-        }
-        if (decimal === 0) break;
-      }
-      return (
-        /** @type {import('./romans').RomanNumeral} */
-        result.join("")
-      );
+      if (!initialized) initializeLookupTables();
+      return ROMAN_LOOKUP[decimal];
     };
     var deromanize = (romanStr) => {
-      if (typeof romanStr !== "string" || !romanPattern.test(romanStr)) {
+      if (typeof romanStr !== "string") {
         throw new Error("requires valid roman numeral string");
       }
-      const invalidPatterns = {
-        // IIII or more
-        "I": /I{4,}/,
-        // VV or more
-        "V": /V{2,}/,
-        // XXXX or more
-        "X": /X{4,}/,
-        // LL or more
-        "L": /L{2,}/,
-        // CCCC or more
-        "C": /C{4,}/,
-        // DD or more
-        "D": /D{2,}/,
-        // MMMM or more
-        "M": /M{4,}/
-      };
-      for (const [_2, pattern] of Object.entries(invalidPatterns)) {
-        if (pattern.test(romanStr)) {
-          throw new Error("requires valid roman numeral string");
-        }
+      if (!initialized) initializeLookupTables();
+      const cached = DECIMAL_LOOKUP.get(romanStr);
+      if (cached !== void 0) {
+        return cached;
+      }
+      if (!isValidRoman(romanStr)) {
+        throw new Error("requires valid roman numeral string");
       }
       let result = 0;
       let prevValue = 0;
       for (let i = romanStr.length - 1; i >= 0; i--) {
-        const currentValue = roman_map[
-          /** @type {import('./romans').SingleRomanChar} */
-          romanStr[i]
-        ];
+        const currentValue = CHAR_VALUES[romanStr[i]];
         result += currentValue < prevValue ? -currentValue : currentValue;
         prevValue = currentValue;
       }
-      return (
-        /** @type {import('./romans').ValidDecimal} */
-        result
-      );
+      return result;
     };
+    initializeLookupTables();
+    var allChars = CONVERSION_PAIRS.map((pair) => pair[1]);
+    var allNumerals = CONVERSION_PAIRS.map((pair) => pair[0]);
     module.exports = {
       deromanize,
       romanize: romanize2,
@@ -9221,7 +9297,10 @@ var def = edit(/^ {0,3}\[(label)\]: *(?:\n[ \t]*)?([^<\s][^\s]*|<.*?>)(?:(?: +(?
 var list = edit(/^( {0,3}bull)([ \t][^\n]+?)?(?:\n|$)/).replace(/bull/g, bullet).getRegex();
 var _tag = "address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h[1-6]|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|meta|nav|noframes|ol|optgroup|option|p|param|search|section|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul";
 var _comment = /<!--(?:-?>|[\s\S]*?(?:-->|$))/;
-var html = edit("^ {0,3}(?:<(script|pre|style|textarea)[\\s>][\\s\\S]*?(?:</\\1>[^\\n]*\\n+|$)|comment[^\\n]*(\\n+|$)|<\\?[\\s\\S]*?(?:\\?>\\n*|$)|<![A-Z][\\s\\S]*?(?:>\\n*|$)|<!\\[CDATA\\[[\\s\\S]*?(?:\\]\\]>\\n*|$)|</?(tag)(?: +|\\n|/?>)[\\s\\S]*?(?:(?:\\n[ 	]*)+\\n|$)|<(?!script|pre|style|textarea)([a-z][\\w-]*)(?:attribute)*? */?>(?=[ \\t]*(?:\\n|$))[\\s\\S]*?(?:(?:\\n[ 	]*)+\\n|$)|</(?!script|pre|style|textarea)[a-z][\\w-]*\\s*>(?=[ \\t]*(?:\\n|$))[\\s\\S]*?(?:(?:\\n[ 	]*)+\\n|$))", "i").replace("comment", _comment).replace("tag", _tag).replace("attribute", / +[a-zA-Z:_][\w.:-]*(?: *= *"[^"\n]*"| *= *'[^'\n]*'| *= *[^\s"'=<>`]+)?/).getRegex();
+var html = edit(
+  "^ {0,3}(?:<(script|pre|style|textarea)[\\s>][\\s\\S]*?(?:</\\1>[^\\n]*\\n+|$)|comment[^\\n]*(\\n+|$)|<\\?[\\s\\S]*?(?:\\?>\\n*|$)|<![A-Z][\\s\\S]*?(?:>\\n*|$)|<!\\[CDATA\\[[\\s\\S]*?(?:\\]\\]>\\n*|$)|</?(tag)(?: +|\\n|/?>)[\\s\\S]*?(?:(?:\\n[ 	]*)+\\n|$)|<(?!script|pre|style|textarea)([a-z][\\w-]*)(?:attribute)*? */?>(?=[ \\t]*(?:\\n|$))[\\s\\S]*?(?:(?:\\n[ 	]*)+\\n|$)|</(?!script|pre|style|textarea)[a-z][\\w-]*\\s*>(?=[ \\t]*(?:\\n|$))[\\s\\S]*?(?:(?:\\n[ 	]*)+\\n|$))",
+  "i"
+).replace("comment", _comment).replace("tag", _tag).replace("attribute", / +[a-zA-Z:_][\w.:-]*(?: *= *"[^"\n]*"| *= *'[^'\n]*'| *= *[^\s"'=<>`]+)?/).getRegex();
 var paragraph = edit(_paragraph).replace("hr", hr).replace("heading", " {0,3}#{1,6}(?:\\s|$)").replace("|lheading", "").replace("|table", "").replace("blockquote", " {0,3}>").replace("fences", " {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n").replace("list", " {0,3}(?:[*+-]|1[.)]) ").replace("html", "</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|textarea|!--)").replace("tag", _tag).getRegex();
 var blockquote = edit(/^( {0,3}> ?(paragraph|[^\n]*)(?:\n|$))+/).replace("paragraph", paragraph).getRegex();
 var blockNormal = {
@@ -9239,14 +9318,18 @@ var blockNormal = {
   table: noopTest,
   text: blockText
 };
-var gfmTable = edit("^ *([^\\n ].*)\\n {0,3}((?:\\| *)?:?-+:? *(?:\\| *:?-+:? *)*(?:\\| *)?)(?:\\n((?:(?! *\\n|hr|heading|blockquote|code|fences|list|html).*(?:\\n|$))*)\\n*|$)").replace("hr", hr).replace("heading", " {0,3}#{1,6}(?:\\s|$)").replace("blockquote", " {0,3}>").replace("code", "(?: {4}| {0,3}	)[^\\n]").replace("fences", " {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n").replace("list", " {0,3}(?:[*+-]|1[.)]) ").replace("html", "</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|textarea|!--)").replace("tag", _tag).getRegex();
+var gfmTable = edit(
+  "^ *([^\\n ].*)\\n {0,3}((?:\\| *)?:?-+:? *(?:\\| *:?-+:? *)*(?:\\| *)?)(?:\\n((?:(?! *\\n|hr|heading|blockquote|code|fences|list|html).*(?:\\n|$))*)\\n*|$)"
+).replace("hr", hr).replace("heading", " {0,3}#{1,6}(?:\\s|$)").replace("blockquote", " {0,3}>").replace("code", "(?: {4}| {0,3}	)[^\\n]").replace("fences", " {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n").replace("list", " {0,3}(?:[*+-]|1[.)]) ").replace("html", "</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|textarea|!--)").replace("tag", _tag).getRegex();
 var blockGfm = __spreadProps(__spreadValues({}, blockNormal), {
   lheading: lheadingGfm,
   table: gfmTable,
   paragraph: edit(_paragraph).replace("hr", hr).replace("heading", " {0,3}#{1,6}(?:\\s|$)").replace("|lheading", "").replace("table", gfmTable).replace("blockquote", " {0,3}>").replace("fences", " {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n").replace("list", " {0,3}(?:[*+-]|1[.)]) ").replace("html", "</?(?:tag)(?: +|\\n|/?>)|<(?:script|pre|style|textarea|!--)").replace("tag", _tag).getRegex()
 });
 var blockPedantic = __spreadProps(__spreadValues({}, blockNormal), {
-  html: edit(`^ *(?:comment *(?:\\n|\\s*$)|<(tag)[\\s\\S]+?</\\1> *(?:\\n{2,}|\\s*$)|<tag(?:"[^"]*"|'[^']*'|\\s[^'"/>\\s]*)*?/?> *(?:\\n{2,}|\\s*$))`).replace("comment", _comment).replace(/tag/g, "(?!(?:a|em|strong|small|s|cite|q|dfn|abbr|data|time|code|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo|span|br|wbr|ins|del|img)\\b)\\w+(?!:|[^\\w\\s@]*@)\\b").getRegex(),
+  html: edit(
+    `^ *(?:comment *(?:\\n|\\s*$)|<(tag)[\\s\\S]+?</\\1> *(?:\\n{2,}|\\s*$)|<tag(?:"[^"]*"|'[^']*'|\\s[^'"/>\\s]*)*?/?> *(?:\\n{2,}|\\s*$))`
+  ).replace("comment", _comment).replace(/tag/g, "(?!(?:a|em|strong|small|s|cite|q|dfn|abbr|data|time|code|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo|span|br|wbr|ins|del|img)\\b)\\w+(?!:|[^\\w\\s@]*@)\\b").getRegex(),
   def: /^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +(["(][^\n]+[")]))? *(?:\n+|$)/,
   heading: /^(#{1,6})(.*)(?:\n+|$)/,
   fences: noopTest,
@@ -9254,7 +9337,7 @@ var blockPedantic = __spreadProps(__spreadValues({}, blockNormal), {
   lheading: /^(.+?)\n {0,3}(=+|-+) *(?:\n+|$)/,
   paragraph: edit(_paragraph).replace("hr", hr).replace("heading", " *#{1,6} *[^\n]").replace("lheading", lheading).replace("|table", "").replace("blockquote", " {0,3}>").replace("|fences", "").replace("|list", "").replace("|html", "").replace("|tag", "").getRegex()
 });
-var escape$1 = /^\\([!"#$%&'()*+,\-./:;<=>?@\[\]\\^_`{|}~])/;
+var escape = /^\\([!"#$%&'()*+,\-./:;<=>?@\[\]\\^_`{|}~])/;
 var inlineCode = /^(`+)([^`]|[^`][\s\S]*?[^`])\1(?!`)/;
 var br = /^( {2,}|\\)\n(?!\s*$)/;
 var inlineText = /^(`+|[^`])(?:(?= {2,}\n)|[\s\S]*?(?:(?=[\\<!\[`*_]|\b_|$)|[^ ](?= {2,}\n)))/;
@@ -9272,13 +9355,18 @@ var emStrongLDelimGfm = edit(emStrongLDelimCore, "u").replace(/punct/g, _punctua
 var emStrongRDelimAstCore = "^[^_*]*?__[^_*]*?\\*[^_*]*?(?=__)|[^*]+(?=[^*])|(?!\\*)punct(\\*+)(?=[\\s]|$)|notPunctSpace(\\*+)(?!\\*)(?=punctSpace|$)|(?!\\*)punctSpace(\\*+)(?=notPunctSpace)|[\\s](\\*+)(?!\\*)(?=punct)|(?!\\*)punct(\\*+)(?!\\*)(?=punct)|notPunctSpace(\\*+)(?=notPunctSpace)";
 var emStrongRDelimAst = edit(emStrongRDelimAstCore, "gu").replace(/notPunctSpace/g, _notPunctuationOrSpace).replace(/punctSpace/g, _punctuationOrSpace).replace(/punct/g, _punctuation).getRegex();
 var emStrongRDelimAstGfm = edit(emStrongRDelimAstCore, "gu").replace(/notPunctSpace/g, _notPunctuationOrSpaceGfmStrongEm).replace(/punctSpace/g, _punctuationOrSpaceGfmStrongEm).replace(/punct/g, _punctuationGfmStrongEm).getRegex();
-var emStrongRDelimUnd = edit("^[^_*]*?\\*\\*[^_*]*?_[^_*]*?(?=\\*\\*)|[^_]+(?=[^_])|(?!_)punct(_+)(?=[\\s]|$)|notPunctSpace(_+)(?!_)(?=punctSpace|$)|(?!_)punctSpace(_+)(?=notPunctSpace)|[\\s](_+)(?!_)(?=punct)|(?!_)punct(_+)(?!_)(?=punct)", "gu").replace(/notPunctSpace/g, _notPunctuationOrSpace).replace(/punctSpace/g, _punctuationOrSpace).replace(/punct/g, _punctuation).getRegex();
+var emStrongRDelimUnd = edit(
+  "^[^_*]*?\\*\\*[^_*]*?_[^_*]*?(?=\\*\\*)|[^_]+(?=[^_])|(?!_)punct(_+)(?=[\\s]|$)|notPunctSpace(_+)(?!_)(?=punctSpace|$)|(?!_)punctSpace(_+)(?=notPunctSpace)|[\\s](_+)(?!_)(?=punct)|(?!_)punct(_+)(?!_)(?=punct)",
+  "gu"
+).replace(/notPunctSpace/g, _notPunctuationOrSpace).replace(/punctSpace/g, _punctuationOrSpace).replace(/punct/g, _punctuation).getRegex();
 var anyPunctuation = edit(/\\(punct)/, "gu").replace(/punct/g, _punctuation).getRegex();
 var autolink = edit(/^<(scheme:[^\s\x00-\x1f<>]*|email)>/).replace("scheme", /[a-zA-Z][a-zA-Z0-9+.-]{1,31}/).replace("email", /[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+(@)[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+(?![-_])/).getRegex();
 var _inlineComment = edit(_comment).replace("(?:-->|$)", "-->").getRegex();
-var tag = edit("^comment|^</[a-zA-Z][\\w:-]*\\s*>|^<[a-zA-Z][\\w-]*(?:attribute)*?\\s*/?>|^<\\?[\\s\\S]*?\\?>|^<![a-zA-Z]+\\s[\\s\\S]*?>|^<!\\[CDATA\\[[\\s\\S]*?\\]\\]>").replace("comment", _inlineComment).replace("attribute", /\s+[a-zA-Z:_][\w.:-]*(?:\s*=\s*"[^"]*"|\s*=\s*'[^']*'|\s*=\s*[^\s"'=<>`]+)?/).getRegex();
+var tag = edit(
+  "^comment|^</[a-zA-Z][\\w:-]*\\s*>|^<[a-zA-Z][\\w-]*(?:attribute)*?\\s*/?>|^<\\?[\\s\\S]*?\\?>|^<![a-zA-Z]+\\s[\\s\\S]*?>|^<!\\[CDATA\\[[\\s\\S]*?\\]\\]>"
+).replace("comment", _inlineComment).replace("attribute", /\s+[a-zA-Z:_][\w.:-]*(?:\s*=\s*"[^"]*"|\s*=\s*'[^']*'|\s*=\s*[^\s"'=<>`]+)?/).getRegex();
 var _inlineLabel = /(?:\[(?:\\.|[^\[\]\\])*\]|\\.|`[^`]*`|[^\[\]\\`])*?/;
-var link = edit(/^!?\[(label)\]\(\s*(href)(?:\s+(title))?\s*\)/).replace("label", _inlineLabel).replace("href", /<(?:\\.|[^\n<>\\])+>|[^\s\x00-\x1f]*/).replace("title", /"(?:\\"?|[^"\\])*"|'(?:\\'?|[^'\\])*'|\((?:\\\)?|[^)\\])*\)/).getRegex();
+var link = edit(/^!?\[(label)\]\(\s*(href)(?:(?:[ \t]*(?:\n[ \t]*)?)(title))?\s*\)/).replace("label", _inlineLabel).replace("href", /<(?:\\.|[^\n<>\\])+>|[^ \t\n\x00-\x1f]*/).replace("title", /"(?:\\"?|[^"\\])*"|'(?:\\'?|[^'\\])*'|\((?:\\\)?|[^)\\])*\)/).getRegex();
 var reflink = edit(/^!?\[(label)\]\[(ref)\]/).replace("label", _inlineLabel).replace("ref", _blockLabel).getRegex();
 var nolink = edit(/^!?\[(ref)\](?:\[\])?/).replace("ref", _blockLabel).getRegex();
 var reflinkSearch = edit("reflink|nolink(?!\\()", "g").replace("reflink", reflink).replace("nolink", nolink).getRegex();
@@ -9294,7 +9382,7 @@ var inlineNormal = {
   emStrongLDelim,
   emStrongRDelimAst,
   emStrongRDelimUnd,
-  escape: escape$1,
+  escape,
   link,
   nolink,
   punctuation,
@@ -9339,7 +9427,7 @@ var escapeReplacements = {
   "'": "&#39;"
 };
 var getEscapeReplacement = (ch) => escapeReplacements[ch];
-function escape(html2, encode) {
+function escape2(html2, encode) {
   if (encode) {
     if (other.escapeTest.test(html2)) {
       return html2.replace(other.escapeReplace, getEscapeReplacement);
@@ -9360,12 +9448,11 @@ function cleanUrl(href) {
   return href;
 }
 function splitCells(tableRow, count) {
-  var _a;
+  var _a2;
   const row = tableRow.replace(other.findPipe, (match, offset, str) => {
     let escaped = false;
     let curr = offset;
-    while (--curr >= 0 && str[curr] === "\\")
-      escaped = !escaped;
+    while (--curr >= 0 && str[curr] === "\\") escaped = !escaped;
     if (escaped) {
       return "|";
     } else {
@@ -9376,15 +9463,14 @@ function splitCells(tableRow, count) {
   if (!cells[0].trim()) {
     cells.shift();
   }
-  if (cells.length > 0 && !((_a = cells.at(-1)) == null ? void 0 : _a.trim())) {
+  if (cells.length > 0 && !((_a2 = cells.at(-1)) == null ? void 0 : _a2.trim())) {
     cells.pop();
   }
   if (count) {
     if (cells.length > count) {
       cells.splice(count);
     } else {
-      while (cells.length < count)
-        cells.push("");
+      while (cells.length < count) cells.push("");
     }
   }
   for (; i < cells.length; i++) {
@@ -9400,7 +9486,9 @@ function rtrim(str, c, invert) {
   let suffLen = 0;
   while (suffLen < l) {
     const currChar = str.charAt(l - suffLen - 1);
-    if (currChar === c && true) {
+    if (currChar === c && !invert) {
+      suffLen++;
+    } else if (currChar !== c && invert) {
       suffLen++;
     } else {
       break;
@@ -9425,32 +9513,26 @@ function findClosingBracket(str, b) {
       }
     }
   }
+  if (level > 0) {
+    return -2;
+  }
   return -1;
 }
 function outputLink(cap, link2, raw, lexer2, rules) {
   const href = link2.href;
   const title = link2.title || null;
   const text = cap[1].replace(rules.other.outputLinkReplace, "$1");
-  if (cap[0].charAt(0) !== "!") {
-    lexer2.state.inLink = true;
-    const token = {
-      type: "link",
-      raw,
-      href,
-      title,
-      text,
-      tokens: lexer2.inlineTokens(text)
-    };
-    lexer2.state.inLink = false;
-    return token;
-  }
-  return {
-    type: "image",
+  lexer2.state.inLink = true;
+  const token = {
+    type: cap[0].charAt(0) === "!" ? "image" : "link",
     raw,
     href,
     title,
-    text
+    text,
+    tokens: lexer2.inlineTokens(text)
   };
+  lexer2.state.inLink = false;
+  return token;
 }
 function indentCodeCompensation(raw, text, rules) {
   const matchIndentToCode = raw.match(rules.other.indentCodeCompensation);
@@ -9799,7 +9881,7 @@ ${currentText}` : currentText;
     }
   }
   table(src) {
-    var _a;
+    var _a2;
     const cap = this.rules.block.table.exec(src);
     if (!cap) {
       return;
@@ -9809,7 +9891,7 @@ ${currentText}` : currentText;
     }
     const headers = splitCells(cap[1]);
     const aligns = cap[2].replace(this.rules.other.tableAlignChars, "").split("|");
-    const rows = ((_a = cap[3]) == null ? void 0 : _a.trim()) ? cap[3].replace(this.rules.other.tableRowBlankLine, "").split("\n") : [];
+    const rows = ((_a2 = cap[3]) == null ? void 0 : _a2.trim()) ? cap[3].replace(this.rules.other.tableRowBlankLine, "").split("\n") : [];
     const item = {
       type: "table",
       raw: cap[0],
@@ -9933,6 +10015,9 @@ ${currentText}` : currentText;
         }
       } else {
         const lastParenIndex = findClosingBracket(cap[2], "()");
+        if (lastParenIndex === -2) {
+          return;
+        }
         if (lastParenIndex > -1) {
           const start = cap[0].indexOf("!") === 0 ? 5 : 4;
           const linkLen = start + cap[1].length + lastParenIndex;
@@ -9984,10 +10069,8 @@ ${currentText}` : currentText;
   }
   emStrong(src, maskedSrc, prevChar = "") {
     let match = this.rules.inline.emStrongLDelim.exec(src);
-    if (!match)
-      return;
-    if (match[3] && prevChar.match(this.rules.other.unicodeAlphaNumeric))
-      return;
+    if (!match) return;
+    if (match[3] && prevChar.match(this.rules.other.unicodeAlphaNumeric)) return;
     const nextChar = match[1] || match[2] || "";
     if (!nextChar || !prevChar || this.rules.inline.punctuation.exec(prevChar)) {
       const lLength = [...match[0]].length - 1;
@@ -9997,8 +10080,7 @@ ${currentText}` : currentText;
       maskedSrc = maskedSrc.slice(-1 * src.length + lLength);
       while ((match = endReg.exec(maskedSrc)) != null) {
         rDelim = match[1] || match[2] || match[3] || match[4] || match[5] || match[6];
-        if (!rDelim)
-          continue;
+        if (!rDelim) continue;
         rLength = [...rDelim].length;
         if (match[3] || match[4]) {
           delimTotal += rLength;
@@ -10010,8 +10092,7 @@ ${currentText}` : currentText;
           }
         }
         delimTotal -= rLength;
-        if (delimTotal > 0)
-          continue;
+        if (delimTotal > 0) continue;
         rLength = Math.min(rLength, rLength + delimTotal + midDelimTotal);
         const lastCharLength = [...match[0]][0].length;
         const raw = src.slice(0, lLength + match.index + lastCharLength + rLength);
@@ -10097,7 +10178,7 @@ ${currentText}` : currentText;
     }
   }
   url(src) {
-    var _a, _b;
+    var _a2, _b;
     let cap;
     if (cap = this.rules.inline.url.exec(src)) {
       let text, href;
@@ -10108,7 +10189,7 @@ ${currentText}` : currentText;
         let prevCapZero;
         do {
           prevCapZero = cap[0];
-          cap[0] = (_b = (_a = this.rules.inline._backpedal.exec(cap[0])) == null ? void 0 : _a[0]) != null ? _b : "";
+          cap[0] = (_b = (_a2 = this.rules.inline._backpedal.exec(cap[0])) == null ? void 0 : _a2[0]) != null ? _b : "";
         } while (prevCapZero !== cap[0]);
         text = cap[0];
         if (cap[1] === "www.") {
@@ -10220,13 +10301,13 @@ var _Lexer = class __Lexer {
     return this.tokens;
   }
   blockTokens(src, tokens = [], lastParagraphClipped = false) {
-    var _a, _b, _c;
+    var _a2, _b, _c;
     if (this.options.pedantic) {
       src = src.replace(other.tabCharGlobal, "    ").replace(other.spaceLine, "");
     }
     while (src) {
       let token;
-      if ((_b = (_a = this.options.extensions) == null ? void 0 : _a.block) == null ? void 0 : _b.some((extTokenizer) => {
+      if ((_b = (_a2 = this.options.extensions) == null ? void 0 : _a2.block) == null ? void 0 : _b.some((extTokenizer) => {
         if (token = extTokenizer.call({ lexer: this }, src, tokens)) {
           src = src.substring(token.raw.length);
           tokens.push(token);
@@ -10376,7 +10457,7 @@ var _Lexer = class __Lexer {
    * Lexing/Compiling
    */
   inlineTokens(src, tokens = []) {
-    var _a, _b, _c;
+    var _a2, _b, _c;
     let maskedSrc = src;
     let match = null;
     if (this.tokens.links) {
@@ -10403,7 +10484,7 @@ var _Lexer = class __Lexer {
       }
       keepPrevChar = false;
       let token;
-      if ((_b = (_a = this.options.extensions) == null ? void 0 : _a.inline) == null ? void 0 : _b.some((extTokenizer) => {
+      if ((_b = (_a2 = this.options.extensions) == null ? void 0 : _a2.inline) == null ? void 0 : _b.some((extTokenizer) => {
         if (token = extTokenizer.call({ lexer: this }, src, tokens)) {
           src = src.substring(token.raw.length);
           tokens.push(token);
@@ -10523,13 +10604,13 @@ var _Renderer = class {
     return "";
   }
   code({ text, lang, escaped }) {
-    var _a;
-    const langString = (_a = (lang || "").match(other.notSpaceStart)) == null ? void 0 : _a[0];
+    var _a2;
+    const langString = (_a2 = (lang || "").match(other.notSpaceStart)) == null ? void 0 : _a2[0];
     const code = text.replace(other.endingNewline, "") + "\n";
     if (!langString) {
-      return "<pre><code>" + (escaped ? code : escape(code, true)) + "</code></pre>\n";
+      return "<pre><code>" + (escaped ? code : escape2(code, true)) + "</code></pre>\n";
     }
-    return '<pre><code class="language-' + escape(langString) + '">' + (escaped ? code : escape(code, true)) + "</code></pre>\n";
+    return '<pre><code class="language-' + escape2(langString) + '">' + (escaped ? code : escape2(code, true)) + "</code></pre>\n";
   }
   blockquote({ tokens }) {
     const body = this.parser.parse(tokens);
@@ -10560,15 +10641,15 @@ ${body}</blockquote>
     return "<" + type + startAttr + ">\n" + body + "</" + type + ">\n";
   }
   listitem(item) {
-    var _a;
+    var _a2;
     let itemBody = "";
     if (item.task) {
       const checkbox = this.checkbox({ checked: !!item.checked });
       if (item.loose) {
-        if (((_a = item.tokens[0]) == null ? void 0 : _a.type) === "paragraph") {
+        if (((_a2 = item.tokens[0]) == null ? void 0 : _a2.type) === "paragraph") {
           item.tokens[0].text = checkbox + " " + item.tokens[0].text;
           if (item.tokens[0].tokens && item.tokens[0].tokens.length > 0 && item.tokens[0].tokens[0].type === "text") {
-            item.tokens[0].tokens[0].text = checkbox + " " + escape(item.tokens[0].tokens[0].text);
+            item.tokens[0].tokens[0].text = checkbox + " " + escape2(item.tokens[0].tokens[0].text);
             item.tokens[0].tokens[0].escaped = true;
           }
         } else {
@@ -10610,8 +10691,7 @@ ${body}</blockquote>
       }
       body += this.tablerow({ text: cell });
     }
-    if (body)
-      body = `<tbody>${body}</tbody>`;
+    if (body) body = `<tbody>${body}</tbody>`;
     return "<table>\n<thead>\n" + header + "</thead>\n" + body + "</table>\n";
   }
   tablerow({ text }) {
@@ -10636,7 +10716,7 @@ ${text}</tr>
     return `<em>${this.parser.parseInline(tokens)}</em>`;
   }
   codespan({ text }) {
-    return `<code>${escape(text, true)}</code>`;
+    return `<code>${escape2(text, true)}</code>`;
   }
   br(token) {
     return "<br>";
@@ -10653,26 +10733,29 @@ ${text}</tr>
     href = cleanHref;
     let out = '<a href="' + href + '"';
     if (title) {
-      out += ' title="' + escape(title) + '"';
+      out += ' title="' + escape2(title) + '"';
     }
     out += ">" + text + "</a>";
     return out;
   }
-  image({ href, title, text }) {
+  image({ href, title, text, tokens }) {
+    if (tokens) {
+      text = this.parser.parseInline(tokens, this.parser.textRenderer);
+    }
     const cleanHref = cleanUrl(href);
     if (cleanHref === null) {
-      return escape(text);
+      return escape2(text);
     }
     href = cleanHref;
     let out = `<img src="${href}" alt="${text}"`;
     if (title) {
-      out += ` title="${escape(title)}"`;
+      out += ` title="${escape2(title)}"`;
     }
     out += ">";
     return out;
   }
   text(token) {
-    return "tokens" in token && token.tokens ? this.parser.parseInline(token.tokens) : "escaped" in token && token.escaped ? token.text : escape(token.text);
+    return "tokens" in token && token.tokens ? this.parser.parseInline(token.tokens) : "escaped" in token && token.escaped ? token.text : escape2(token.text);
   }
 };
 var _TextRenderer = class {
@@ -10735,11 +10818,11 @@ var _Parser = class __Parser {
    * Parse Loop
    */
   parse(tokens, top = true) {
-    var _a, _b;
+    var _a2, _b;
     let out = "";
     for (let i = 0; i < tokens.length; i++) {
       const anyToken = tokens[i];
-      if ((_b = (_a = this.options.extensions) == null ? void 0 : _a.renderers) == null ? void 0 : _b[anyToken.type]) {
+      if ((_b = (_a2 = this.options.extensions) == null ? void 0 : _a2.renderers) == null ? void 0 : _b[anyToken.type]) {
         const genericToken = anyToken;
         const ret = this.options.extensions.renderers[genericToken.type].call({ parser: this }, genericToken);
         if (ret !== false || !["space", "hr", "heading", "code", "table", "blockquote", "list", "html", "paragraph", "text"].includes(genericToken.type)) {
@@ -10821,11 +10904,11 @@ var _Parser = class __Parser {
    * Parse Inline Tokens
    */
   parseInline(tokens, renderer2 = this.renderer) {
-    var _a, _b;
+    var _a2, _b;
     let out = "";
     for (let i = 0; i < tokens.length; i++) {
       const anyToken = tokens[i];
-      if ((_b = (_a = this.options.extensions) == null ? void 0 : _a.renderers) == null ? void 0 : _b[anyToken.type]) {
+      if ((_b = (_a2 = this.options.extensions) == null ? void 0 : _a2.renderers) == null ? void 0 : _b[anyToken.type]) {
         const ret = this.options.extensions.renderers[anyToken.type].call({ parser: this }, anyToken);
         if (ret !== false || !["escape", "html", "link", "image", "strong", "em", "codespan", "br", "del", "text"].includes(anyToken.type)) {
           out += ret || "";
@@ -10888,7 +10971,8 @@ var _Parser = class __Parser {
     return out;
   }
 };
-var _Hooks = class {
+var _a;
+var _Hooks = (_a = class {
   constructor(options2) {
     __publicField(this, "options");
     __publicField(this, "block");
@@ -10924,12 +11008,11 @@ var _Hooks = class {
   provideParser() {
     return this.block ? _Parser.parse : _Parser.parseInline;
   }
-};
-__publicField(_Hooks, "passThroughHooks", /* @__PURE__ */ new Set([
+}, __publicField(_a, "passThroughHooks", /* @__PURE__ */ new Set([
   "preprocess",
   "postprocess",
   "processAllTokens"
-]));
+])), _a);
 var Marked = class {
   constructor(...args) {
     __publicField(this, "defaults", _getDefaults());
@@ -10948,7 +11031,7 @@ var Marked = class {
    * Run callback for every token
    */
   walkTokens(tokens, callback) {
-    var _a, _b;
+    var _a2, _b;
     let values = [];
     for (const token of tokens) {
       values = values.concat(callback.call(this, token));
@@ -10972,7 +11055,7 @@ var Marked = class {
         }
         default: {
           const genericToken = token;
-          if ((_b = (_a = this.defaults.extensions) == null ? void 0 : _a.childTokens) == null ? void 0 : _b[genericToken.type]) {
+          if ((_b = (_a2 = this.defaults.extensions) == null ? void 0 : _a2.childTokens) == null ? void 0 : _b[genericToken.type]) {
             this.defaults.extensions.childTokens[genericToken.type].forEach((childTokens) => {
               const tokens2 = genericToken[childTokens].flat(Infinity);
               values = values.concat(this.walkTokens(tokens2, callback));
@@ -11146,7 +11229,7 @@ var Marked = class {
     return _Parser.parse(tokens, options2 != null ? options2 : this.defaults);
   }
   parseMarkdown(blockType) {
-    const parse = (src, options2) => {
+    const parse2 = (src, options2) => {
       const origOpt = __spreadValues({}, options2);
       const opt = __spreadValues(__spreadValues({}, this.defaults), origOpt);
       const throwError = this.onError(!!opt.silent, !!opt.async);
@@ -11188,13 +11271,13 @@ var Marked = class {
         return throwError(e);
       }
     };
-    return parse;
+    return parse2;
   }
   onError(silent, async) {
     return (e) => {
       e.message += "\nPlease report this to https://github.com/markedjs/marked.";
       if (silent) {
-        const msg = "<p>An error occurred:</p><pre>" + escape(e.message + "", true) + "</pre>";
+        const msg = "<p>An error occurred:</p><pre>" + escape2(e.message + "", true) + "</pre>";
         if (async) {
           return Promise.resolve(msg);
         }
@@ -11255,12 +11338,12 @@ function src_default({ interruptPatterns = [], skipEmptyRows = true } = {}) {
         level: "block",
         // Is this a block-level or inline-level tokenizer?
         start(src) {
-          var _a;
-          return (_a = src.match(/\n *([^\n ].*\|.*)\n/m)) == null ? void 0 : _a.index;
+          var _a2;
+          return (_a2 = src.match(/\n *([^\n ].*\|.*)\n/m)) == null ? void 0 : _a2.index;
         },
         // Hint to Marked.js to stop and check for a match
         tokenizer(src, tokens) {
-          var _a;
+          var _a2;
           let regexString = "^ *([^\\n ].*\\|.*\\n(?: *[^\\s].*\\n)*?) {0,3}(?:\\| *)?(:?-+(?: *(?:100|[1-9][0-9]?%) *-+)?:? *(?:\\| *:?-+(?: *(?:100|[1-9][0-9]?%) *-+)?:? *)*)(?:\\| *)?(?:\\n((?:(?! *\\n| {0,3}((?:- *){3,}|(?:_ *){3,}|(?:\\* *){3,})(?:\\n+|$)| {0,3}#{1,6}(?:\\s|$)| {0,3}>| {4}[^\\n]| {0,3}(?:`{3,}(?=[^`\\n]*\\n)|~{3,})[^\\n]*\\n| {0,3}(?:[*+-]|1[.)]) |<\\/?(?:address|article|aside|base|basefont|blockquote|body|caption|center|col|colgroup|dd|details|dialog|dir|div|dl|dt|fieldset|figcaption|figure|footer|form|frame|frameset|h[1-6]|head|header|hr|html|iframe|legend|li|link|main|menu|menuitem|meta|nav|noframes|ol|optgroup|option|p|param|section|source|summary|table|tbody|td|tfoot|th|thead|title|tr|track|ul)(?: +|\\n|\\/?>)|<(?:script|pre|style|textarea|!--)endRegex).*(?:\\n|$))*)\\n*|$)";
           regexString = regexString.replace("endRegex", interruptPatterns.map((str) => `|(?:${str})`).join(""));
           const widthRegex = / *(?:100|[1-9][0-9]?%) */g;
@@ -11271,7 +11354,7 @@ function src_default({ interruptPatterns = [], skipEmptyRows = true } = {}) {
               type: "spanTable",
               header: cap[1].replace(/\n$/, "").split("\n"),
               align: cap[2].replace(widthRegex, "").replace(/^ *|\| *$/g, "").split(/ *\| */),
-              rows: ((_a = cap[3]) == null ? void 0 : _a.trim()) ? cap[3].replace(/\n[ \t]*$/, "").split("\n") : [],
+              rows: ((_a2 = cap[3]) == null ? void 0 : _a2.trim()) ? cap[3].replace(/\n[ \t]*$/, "").split("\n") : [],
               width: cap[2].replace(/:/g, "").replace(/-+| /g, "").split("|")
             };
             item.header[0] = splitCells2(item.header[0]);
@@ -11372,9 +11455,9 @@ var getTableCell = (text, cell, type, align, width) => {
 `;
 };
 var splitCells2 = (tableRow, count, prevRow = [], skipEmptyRows) => {
-  var _a, _b, _c;
+  var _a2, _b, _c;
   const cells = [...tableRow.trim().matchAll(/(?:[^|\\]|\\.?)+(?:\|+|$)/g)].map((x) => x[0]);
-  if (!((_a = cells[0]) == null ? void 0 : _a.trim())) {
+  if (!((_a2 = cells[0]) == null ? void 0 : _a2.trim())) {
     cells.shift();
   }
   if (!((_b = cells[cells.length - 1]) == null ? void 0 : _b.trim())) {
@@ -11440,8 +11523,8 @@ function src_default2() {
         name: "definitionListsSingleLine",
         level: "block",
         start(src) {
-          var _a;
-          return (_a = src.match(/\n[^\n]*?::[^\n]*/m)) == null ? void 0 : _a.index;
+          var _a2;
+          return (_a2 = src.match(/\n[^\n]*?::[^\n]*/m)) == null ? void 0 : _a2.index;
         },
         // Hint to Marked.js to stop and check for a match
         tokenizer(src, tokens) {
@@ -11481,19 +11564,19 @@ function src_default2() {
         name: "definitionListsMultiLine",
         level: "block",
         start(src) {
-          var _a;
-          return (_a = src.match(/\n[^\n]*\n::[^:\n]/m)) == null ? void 0 : _a.index;
+          var _a2;
+          return (_a2 = src.match(/\n[^\n]*\n::[^:\n]/m)) == null ? void 0 : _a2.index;
         },
         // Hint to Marked.js to stop and check for a match
         tokenizer(src, tokens) {
-          var _a;
+          var _a2;
           const regex2 = /(\n?\n?(?!::)[^\n]+?(?=\n::[^:\n]))|\n::([^:\n](?:.|\n)*?(?=(?:\n::)|(?:\n\n)|$))/y;
           let match;
           let endIndex = 0;
           const definitions = [];
           while (match = regex2.exec(src)) {
             if (match[1]) {
-              if (((_a = this.lexer.blockTokens(match[1].trim())[0]) == null ? void 0 : _a.type) !== "paragraph")
+              if (((_a2 = this.lexer.blockTokens(match[1].trim())[0]) == null ? void 0 : _a2.type) !== "paragraph")
                 break;
               definitions.push({
                 dt: this.lexer.inlineTokens(match[1].trim()),
@@ -11541,12 +11624,12 @@ function src_default3() {
         name: "alignedParagraphs",
         level: "block",
         start(src) {
-          var _a;
-          return (_a = src.match(/(?:-:|:-|-:) {1}/m)) == null ? void 0 : _a.index;
+          var _a2;
+          return (_a2 = src.match(/(?:-:|:-|-:) {1}/m)) == null ? void 0 : _a2.index;
         },
         // Hint to Marked.js to stop and check for a match
         tokenizer(src, tokens) {
-          var _a, _b, _c;
+          var _a2, _b, _c;
           const alignedParagraphClasses = [];
           alignedParagraphClasses[2] = "Left";
           alignedParagraphClasses[4] = "Right";
@@ -11555,7 +11638,7 @@ function src_default3() {
           const match = regex2.exec(src);
           if (match == null ? void 0 : match.length) {
             let whichAlign;
-            if ((_a = match[2]) == null ? void 0 : _a.length) whichAlign = 2;
+            if ((_a2 = match[2]) == null ? void 0 : _a2.length) whichAlign = 2;
             if ((_b = match[4]) == null ? void 0 : _b.length) whichAlign = 4;
             if ((_c = match[6]) == null ? void 0 : _c.length) whichAlign = 6;
             return {
@@ -11586,8 +11669,8 @@ function src_default4() {
         name: "nonbreakingSpaces",
         level: "inline",
         start(src) {
-          var _a;
-          return (_a = src.match(/:>+/m)) == null ? void 0 : _a.index;
+          var _a2;
+          return (_a2 = src.match(/:>+/m)) == null ? void 0 : _a2.index;
         },
         // Hint to Marked.js to stop and check for a match
         tokenizer(src, tokens) {
@@ -11619,8 +11702,8 @@ function src_default5() {
         name: "subSuperText",
         level: "inline",
         start(src) {
-          var _a;
-          return (_a = src.match(/\^/m)) == null ? void 0 : _a.index;
+          var _a2;
+          return (_a2 = src.match(/\^/m)) == null ? void 0 : _a2.index;
         },
         // Hint to Marked.js to stop and check for a match
         tokenizer(src, tokens) {
@@ -11789,8 +11872,8 @@ function markedEmoji(options2) {
       name: "emoji",
       level: "inline",
       start(src) {
-        var _a;
-        return (_a = src.match(emojiRegex)) == null ? void 0 : _a.index;
+        var _a2;
+        return (_a2 = src.match(emojiRegex)) == null ? void 0 : _a2.index;
       },
       tokenizer(src, tokens) {
         const match = tokenizerRule.exec(src);
@@ -11840,6 +11923,7 @@ var diceFont = {
   "df_d10_7": "df d10-7",
   "df_d10_8": "df d10-8",
   "df_d10_9": "df d10-9",
+  "df_d10_0": "df d10-0",
   "df_d12": "df d12",
   "df_d12_1": "df d12-1",
   "df_d12_10": "df d12-10",
@@ -11916,7 +12000,108 @@ var diceFont = {
   "df_solid_small_dot_d6_3": "df solid-small-dot-d6-3",
   "df_solid_small_dot_d6_4": "df solid-small-dot-d6-4",
   "df_solid_small_dot_d6_5": "df solid-small-dot-d6-5",
-  "df_solid_small_dot_d6_6": "df solid-small-dot-d6-6"
+  "df_solid_small_dot_d6_6": "df solid-small-dot-d6-6",
+  "df_d10_00": "df d10-00",
+  "df_d10_01": "df d10-01",
+  "df_d10_02": "df d10-02",
+  "df_d10_03": "df d10-03",
+  "df_d10_04": "df d10-04",
+  "df_d10_05": "df d10-05",
+  "df_d10_06": "df d10-06",
+  "df_d10_07": "df d10-07",
+  "df_d10_08": "df d10-08",
+  "df_d10_09": "df d10-09",
+  "df_d10_10": "df d10-10",
+  "df_d10_11": "df d10-11",
+  "df_d10_12": "df d10-12",
+  "df_d10_13": "df d10-13",
+  "df_d10_14": "df d10-14",
+  "df_d10_15": "df d10-15",
+  "df_d10_16": "df d10-16",
+  "df_d10_17": "df d10-17",
+  "df_d10_18": "df d10-18",
+  "df_d10_19": "df d10-19",
+  "df_d10_20": "df d10-20",
+  "df_d10_21": "df d10-21",
+  "df_d10_22": "df d10-22",
+  "df_d10_23": "df d10-23",
+  "df_d10_24": "df d10-24",
+  "df_d10_25": "df d10-25",
+  "df_d10_26": "df d10-26",
+  "df_d10_27": "df d10-27",
+  "df_d10_28": "df d10-28",
+  "df_d10_29": "df d10-29",
+  "df_d10_30": "df d10-30",
+  "df_d10_31": "df d10-31",
+  "df_d10_32": "df d10-32",
+  "df_d10_33": "df d10-33",
+  "df_d10_34": "df d10-34",
+  "df_d10_35": "df d10-35",
+  "df_d10_36": "df d10-36",
+  "df_d10_37": "df d10-37",
+  "df_d10_38": "df d10-38",
+  "df_d10_39": "df d10-39",
+  "df_d10_40": "df d10-40",
+  "df_d10_41": "df d10-41",
+  "df_d10_42": "df d10-42",
+  "df_d10_43": "df d10-43",
+  "df_d10_44": "df d10-44",
+  "df_d10_45": "df d10-45",
+  "df_d10_46": "df d10-46",
+  "df_d10_47": "df d10-47",
+  "df_d10_48": "df d10-48",
+  "df_d10_49": "df d10-49",
+  "df_d10_50": "df d10-50",
+  "df_d10_51": "df d10-51",
+  "df_d10_52": "df d10-52",
+  "df_d10_53": "df d10-53",
+  "df_d10_54": "df d10-54",
+  "df_d10_55": "df d10-55",
+  "df_d10_56": "df d10-56",
+  "df_d10_57": "df d10-57",
+  "df_d10_58": "df d10-58",
+  "df_d10_59": "df d10-59",
+  "df_d10_60": "df d10-60",
+  "df_d10_61": "df d10-61",
+  "df_d10_62": "df d10-62",
+  "df_d10_63": "df d10-63",
+  "df_d10_64": "df d10-64",
+  "df_d10_65": "df d10-65",
+  "df_d10_66": "df d10-66",
+  "df_d10_67": "df d10-67",
+  "df_d10_68": "df d10-68",
+  "df_d10_69": "df d10-69",
+  "df_d10_70": "df d10-70",
+  "df_d10_71": "df d10-71",
+  "df_d10_72": "df d10-72",
+  "df_d10_73": "df d10-73",
+  "df_d10_74": "df d10-74",
+  "df_d10_75": "df d10-75",
+  "df_d10_76": "df d10-76",
+  "df_d10_77": "df d10-77",
+  "df_d10_78": "df d10-78",
+  "df_d10_79": "df d10-79",
+  "df_d10_80": "df d10-80",
+  "df_d10_81": "df d10-81",
+  "df_d10_82": "df d10-82",
+  "df_d10_83": "df d10-83",
+  "df_d10_84": "df d10-84",
+  "df_d10_85": "df d10-85",
+  "df_d10_86": "df d10-86",
+  "df_d10_87": "df d10-87",
+  "df_d10_88": "df d10-88",
+  "df_d10_89": "df d10-89",
+  "df_d10_90": "df d10-90",
+  "df_d10_91": "df d10-91",
+  "df_d10_92": "df d10-92",
+  "df_d10_93": "df d10-93",
+  "df_d10_94": "df d10-94",
+  "df_d10_95": "df d10-95",
+  "df_d10_96": "df d10-96",
+  "df_d10_97": "df d10-97",
+  "df_d10_98": "df d10-98",
+  "df_d10_99": "df d10-99",
+  "df_d10_100": "df d10-100"
 };
 var diceFont_default = diceFont;
 
@@ -14830,9 +15015,9 @@ renderer.link = function(token) {
   if (href === null) {
     return text;
   }
-  let out = `<a href="${escape2(href)}"`;
+  let out = `<a href="${escape3(href)}"`;
   if (title) {
-    out += ` title="${escape2(title)}"`;
+    out += ` title="${escape3(title)}"`;
   }
   if (self2) {
     out += ' target="_self"';
@@ -14858,13 +15043,13 @@ var mustacheSpans = {
   level: "inline",
   // Is this a block-level or inline-level tokenizer?
   start(src) {
-    var _a;
-    return (_a = src.match(/{{[^{]/)) == null ? void 0 : _a.index;
+    var _a2;
+    return (_a2 = src.match(/{{[^{]/)) == null ? void 0 : _a2.index;
   },
   // Hint to Marked.js to stop and check for a match
   tokenizer(src, tokens) {
     const completeSpan = /^{{[^\n]*}}/;
-    const inlineRegex = /{{(?=((?:[:=](?:"['\w,\-()#%=?. ]*"|[\w\-()#%.]*)|[^"=':{}\s]*)*))\1 *|}}/g;
+    const inlineRegex = /{{(?=((?:[:=](?:"['\w,\-+*/()#%=?.&:!@$^;:\[\]_= ]*"|[\w\-+*/()#%.]*)|[^"=':{}\s]*)*))\1 *|}}/g;
     const match = completeSpan.exec(src);
     if (match) {
       let blockCount = 0;
@@ -14915,14 +15100,14 @@ var mustacheDivs = {
   name: "mustacheDivs",
   level: "block",
   start(src) {
-    var _a;
-    return (_a = src.match(/\n *{{[^{]/m)) == null ? void 0 : _a.index;
+    var _a2;
+    return (_a2 = src.match(/\n *{{[^{]/m)) == null ? void 0 : _a2.index;
   },
   // Hint to Marked.js to stop and check for a match
   tokenizer(src, tokens) {
-    var _a;
+    var _a2;
     const completeBlock = new RegExp("^ *{{[^\\n}]* *\\n.*\\n *}}", "s");
-    const blockRegex = /^ *{{(?=((?:[:=](?:"['\w,\-()#%=?. ]*"|[\w\-()#%.]*)|[^"=':{}\s]*)*))\1 *$|^ *}}$/gm;
+    const blockRegex = /^ *{{(?=((?:[:=](?:"['\w,\-+*/()#%=?.&:!@$^;:\[\]_= ]*"|[\w\-()#%.]*)|[^"=':{}\s]*)*))\1 *$|^ *}}$/gm;
     const match = completeBlock.exec(src);
     if (match) {
       let blockCount = 0;
@@ -14930,7 +15115,7 @@ var mustacheDivs = {
       let endTags = 0;
       let endToken = 0;
       let delim;
-      while (delim = (_a = blockRegex.exec(match[0])) == null ? void 0 : _a[0].trim()) {
+      while (delim = (_a2 = blockRegex.exec(match[0])) == null ? void 0 : _a2[0].trim()) {
         if (import_lodash.default.isEmpty(tags)) {
           tags = processStyleTags(delim.substring(2));
           endTags = delim.length + src.indexOf(delim);
@@ -14972,12 +15157,12 @@ var mustacheInjectInline = {
   name: "mustacheInjectInline",
   level: "inline",
   start(src) {
-    var _a;
-    return (_a = src.match(/ *{[^{\n]/)) == null ? void 0 : _a.index;
+    var _a2;
+    return (_a2 = src.match(/ *{[^{\n]/)) == null ? void 0 : _a2.index;
   },
   // Hint to Marked.js to stop and check for a match
   tokenizer(src, tokens) {
-    const inlineRegex = /^ *{(?=((?:[:=](?:"['\w,\-()#%=?. ]*"|[\w\-()#%.]*)|[^"=':{}\s]*)*))\1}/g;
+    const inlineRegex = /^ *{(?=((?:[:=](?:"['\w,\-+*/()#%=?.&:!@$^;:\[\]_= ]*"|[\w\-()#%.]*)|[^"=':{}\s]*)*))\1}/g;
     const match = inlineRegex.exec(src);
     if (match) {
       const lastToken = tokens[tokens.length - 1];
@@ -15017,12 +15202,12 @@ var mustacheInjectBlock = {
     name: "mustacheInjectBlock",
     level: "block",
     start(src) {
-      var _a;
-      return (_a = src.match(/\n *{[^{\n]/m)) == null ? void 0 : _a.index;
+      var _a2;
+      return (_a2 = src.match(/\n *{[^{\n]/m)) == null ? void 0 : _a2.index;
     },
     // Hint to Marked.js to stop and check for a match
     tokenizer(src, tokens) {
-      const inlineRegex = /^ *{(?=((?:[:=](?:"['\w,\-()#%=?. ]*"|[\w\-()#%.]*)|[^"=':{}\s]*)*))\1}/ym;
+      const inlineRegex = /^ *{(?=((?:[:=](?:"['\w,\-+*/()#%=?.&:!@$^;:\[\]_= ]*"|[\w\-+*/()#%.]*)|[^"=':{}\s]*)*))\1}/ym;
       const match = inlineRegex.exec(src);
       if (match) {
         const lastToken = tokens[tokens.length - 1];
@@ -15066,8 +15251,8 @@ var forcedParagraphBreaks = {
   name: "hardBreaks",
   level: "block",
   start(src) {
-    var _a;
-    return (_a = src.match(/\n:+$/m)) == null ? void 0 : _a.index;
+    var _a2;
+    return (_a2 = src.match(/\n:+$/m)) == null ? void 0 : _a2.index;
   },
   // Hint to Marked.js to stop and check for a match
   tokenizer(src, tokens) {
@@ -15090,14 +15275,14 @@ var forcedParagraphBreaks = {
   }
 };
 var replaceVar = function(input, hoist = false, allowUnresolved = false) {
-  var _a, _b;
+  var _a2, _b;
   const regex2 = /([!$]?)\[((?!\s*\])(?:\\.|[^\[\]\\])+)\]/g;
   const match = regex2.exec(input);
   const prefix = match[1];
   const label = normalizeVarNames(match[2]);
   const mathRegex = /[a-z]+\(|[+\-*/^(),]/g;
   const matches = label.split(mathRegex);
-  const mathVars = (_a = matches.filter((match2) => isNaN(match2))) == null ? void 0 : _a.map((s) => s.trim());
+  const mathVars = (_a2 = matches.filter((match2) => isNaN(match2))) == null ? void 0 : _a2.map((s) => s.trim());
   let replacedLabel = label;
   if (prefix[0] == "$" && (mathVars == null ? void 0 : mathVars[0]) !== label.trim()) {
     mathVars == null ? void 0 : mathVars.forEach((variable) => {
@@ -15107,7 +15292,7 @@ var replaceVar = function(input, hoist = false, allowUnresolved = false) {
     });
     try {
       return mathParser.evaluate(replacedLabel);
-    } catch (error) {
+    } catch (e) {
       return void 0;
     }
   }
@@ -15126,9 +15311,9 @@ var replaceVar = function(input, hoist = false, allowUnresolved = false) {
     return foundVar.content;
 };
 var lookupVar = function(label, index, hoist = false) {
-  var _a, _b;
+  var _a2, _b;
   while (index >= 0) {
-    if (((_a = globalVarsList[index]) == null ? void 0 : _a[label]) !== void 0)
+    if (((_a2 = globalVarsList[index]) == null ? void 0 : _a2[label]) !== void 0)
       return globalVarsList[index][label];
     index--;
   }
@@ -15354,7 +15539,7 @@ var escapeReplacements2 = {
   "'": "&#39;"
 };
 var getEscapeReplacement2 = (ch) => escapeReplacements2[ch];
-var escape2 = function(html2, encode) {
+var escape3 = function(html2, encode) {
   if (encode) {
     if (escapeTest.test(html2)) {
       return html2.replace(escapeReplace, getEscapeReplacement2);
@@ -15386,11 +15571,11 @@ var voidTags = /* @__PURE__ */ new Set([
   "source"
 ]);
 var processStyleTags = (string) => {
-  var _a;
+  var _a2;
   const tags = string.match(/(?:[^, ":=]+|[:=](?:"[^"]*"|))+/g);
   const id = import_lodash.default.remove(tags, (tag2) => tag2.startsWith("#")).map((tag2) => tag2.slice(1))[0] || null;
   const classes = import_lodash.default.remove(tags, (tag2) => !tag2.includes(":") && !tag2.includes("=")).join(" ") || null;
-  const attributes = ((_a = import_lodash.default.remove(tags, (tag2) => tag2.includes("=")).map((tag2) => tag2.replace(/="?([^"]*)"?/g, '="$1"'))) == null ? void 0 : _a.filter((attr) => !attr.startsWith('class="') && !attr.startsWith('style="') && !attr.startsWith('id="')).reduce((obj, attr) => {
+  const attributes = ((_a2 = import_lodash.default.remove(tags, (tag2) => tag2.includes("=")).map((tag2) => tag2.replace(/="?([^"]*)"?/g, '="$1"'))) == null ? void 0 : _a2.filter((attr) => !attr.startsWith('class="') && !attr.startsWith('style="') && !attr.startsWith('id="')).reduce((obj, attr) => {
     const index = attr.indexOf("=");
     let [key, value] = [attr.substring(0, index), attr.substring(index + 1)];
     value = value.replace(/"/g, "");
@@ -15411,9 +15596,9 @@ var processStyleTags = (string) => {
   };
 };
 var extractHTMLStyleTags = (htmlString) => {
-  var _a, _b, _c, _d, _e;
+  var _a2, _b, _c, _d, _e;
   const firstElementOnly = htmlString.split(">")[0];
-  const id = ((_a = firstElementOnly.match(/id="([^"]*)"/)) == null ? void 0 : _a[1]) || null;
+  const id = ((_a2 = firstElementOnly.match(/id="([^"]*)"/)) == null ? void 0 : _a2[1]) || null;
   const classes = ((_b = firstElementOnly.match(/class="([^"]*)"/)) == null ? void 0 : _b[1]) || null;
   const styles = ((_d = (_c = firstElementOnly.match(/style="([^"]*)"/)) == null ? void 0 : _c[1]) == null ? void 0 : _d.split(";").reduce((styleObj, style) => {
     if (style.trim() === "") return styleObj;
@@ -15436,11 +15621,11 @@ var extractHTMLStyleTags = (htmlString) => {
   };
 };
 var mergeHTMLTags = (originalTags, newTags) => {
-  var _a, _b, _c, _d;
+  var _a2, _b, _c, _d;
   return {
     id: newTags.id || originalTags.id || null,
     classes: [originalTags.classes, newTags.classes].join(" ").trim() || null,
-    styles: Object.assign((_a = originalTags.styles) != null ? _a : {}, (_b = newTags.styles) != null ? _b : {}),
+    styles: Object.assign((_a2 = originalTags.styles) != null ? _a2 : {}, (_b = newTags.styles) != null ? _b : {}),
     attributes: Object.assign((_c = originalTags.attributes) != null ? _c : {}, (_d = newTags.attributes) != null ? _d : {})
   };
 };
@@ -15464,7 +15649,7 @@ var Markdown = {
     if (pageNumber == 0) {
       resetHeadings();
     }
-    rawBrewText = rawBrewText.replace(/^\\column$/gm, `
+    rawBrewText = rawBrewText.replace(/^\\column(?:break)?$/gm, `
 <div class='columnSplit'></div>
 `);
     const opts = marked.defaults;

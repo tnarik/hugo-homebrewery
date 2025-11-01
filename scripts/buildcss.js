@@ -5,20 +5,31 @@ const mkdirp = require('mkdirp-classic')
 const outfolder = 'assets'
 mkdirp.sync(outfolder);
 
-// TODO: DO I NEED ALL THE STYLES SUCH AS 'Blank', 'Journal' and 'DMG' ?
-styles = ['5ePHB', 'Blank', 'Journal'];
+// TODO: DO I REALLY NEED ALL THE STYLES SUCH AS 'Blank', 'Journal' and 'DMG' ?
+const styles = ['5ePHB', 'Blank', 'Journal'];
 
-styles.forEach(el => {
-	less.render(fs.readFileSync(`_vendor/github.com/naturalcrit/homebrewery/themes/V3/${el}/style.less`, 'utf8'),
-    { compress: true,
-        paths: ['_vendor/github.com/naturalcrit/homebrewery']
-    })
-	.then( output => {
+async function buildStyle(el) {
+	const combinedLess = `
+		@import "_vendor/github.com/naturalcrit/homebrewery/shared/naturalcrit/styles/reset.less";
+		@import "_vendor/github.com/naturalcrit/homebrewery/themes/V3/${el}/style.less";
+	`;
+
+	try {
+		const output = await less.render(combinedLess,
+		{ compress: true,
+			paths: ['_vendor/github.com/naturalcrit/homebrewery']
+		});
+
 		fs.writeFileSync(`./${outfolder}/hb_${el}.css`, output.css);
 		console.log(`./${outfolder}/hb_${el}.css created!`);
-	}, err => {
-		console.error('❌ Build failed:', err);
+	} catch (err) {
+		console.error(`❌ Build failed: for ${el}`, err);
 		process.exit(1);
-	});
-});
-console.log('✅ CSS Build complete!');
+	}
+}
+async function main() {
+	await Promise.all(styles.map(buildStyle))
+	console.log('✅ CSS Build complete!');
+}
+
+main()
