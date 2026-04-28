@@ -14,6 +14,11 @@
 
         [[module.imports.mounts]]
             excludeFiles = "**.less"
+            source = "themes/fonts/Blank"
+            target = "static/fonts/Blank"
+
+        [[module.imports.mounts]]
+            excludeFiles = "**.less"
             source = "themes/assets"
             target = "static/assets"
 
