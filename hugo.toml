@@ -3,22 +3,22 @@
         path = "github.com/naturalcrit/homebrewery"
         
         [[module.imports.mounts]]
-            excludeFiles = "**.less"
+            files = ["! **.less"]
             source = "themes/fonts/5e"
             target = "static/fonts/5e"
 
         [[module.imports.mounts]]
-            excludeFiles = "**.less"
+            files = ["! **.less"]
             source = "themes/fonts/Journal"
             target = "static/fonts/Journal"
 
         [[module.imports.mounts]]
-            excludeFiles = "**.less"
+            files = ["! **.less"]
             source = "themes/fonts/Blank"
             target = "static/fonts/Blank"
 
         [[module.imports.mounts]]
-            excludeFiles = "**.less"
+            files = ["! **.less"]
             source = "themes/assets"
             target = "static/assets"
 
