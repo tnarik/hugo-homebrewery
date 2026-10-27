@@ -19,6 +19,11 @@
 
         [[module.imports.mounts]]
             files = ["! **.less"]
+            source = "themes/fonts/iconFonts"
+            target = "static/fonts/iconFonts"
+
+        [[module.imports.mounts]]
+            files = ["! **.less"]
             source = "themes/assets"
             target = "static/assets"
 
